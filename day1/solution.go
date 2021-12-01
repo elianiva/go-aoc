@@ -1,4 +1,4 @@
-package main
+package day1
 
 import (
 	"fmt"
@@ -7,8 +7,10 @@ import (
 	"strings"
 )
 
-func main() {
-	inputFile, err := ioutil.ReadFile("./input1.txt")
+func Solve() {
+	fmt.Println("======== DAY 1 ========")
+
+	inputFile, err := ioutil.ReadFile("day1/input1.txt")
 	if err != nil {
 		panic(err)
 	}
