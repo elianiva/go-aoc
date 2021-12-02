@@ -42,18 +42,14 @@ func linesToSlice(str []byte) []int {
 
 func findDepth(lines []int) int {
 	var result int
-	var highest int
-	for _, v := range lines {
-		// only set initial highest score if none was given
-		if highest == 0 {
-			highest = v
-		}
 
-		if v > highest {
+	highest := lines[0]
+	for i := 1; i < len(lines); i++ {
+		if lines[i] > highest {
 			result += 1
 		}
 
-		highest = v
+		highest = lines[i]
 	}
 
 	return result
