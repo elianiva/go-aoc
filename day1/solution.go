@@ -10,7 +10,7 @@ import (
 func Solve() {
 	fmt.Println("======== DAY 1 ========")
 
-	inputFile, err := ioutil.ReadFile("day1/input1.txt")
+	inputFile, err := ioutil.ReadFile("day1/input.txt")
 	if err != nil {
 		panic(err)
 	}
