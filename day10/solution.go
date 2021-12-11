@@ -18,8 +18,7 @@ func Solve() {
 
 	input := strToLines(inputFile)
 
-	errorScore := findErrorScore(input)
-	completionScore := findCompletionScore(input)
+	errorScore, completionScore := findScore(input)
 
 	fmt.Println("PART 1:", errorScore)
 	fmt.Println("PART 2:", completionScore)
@@ -31,27 +30,22 @@ func strToLines(str []byte) []string {
 	return lines
 }
 
-func findErrorScore(lines []string) int {
-	var totalScore int
-	for _, line := range lines {
-		totalScore += getLineErrorScore(line)
-	}
-	return totalScore
-}
-
-func findCompletionScore(lines []string) int {
-	var totalScore sort.IntSlice
+func findScore(lines []string) (int, int) {
+	var completionScore sort.IntSlice
+	var errorScore int
 	for _, line := range lines {
 		if getLineErrorScore(line) == 0 {
-			totalScore = append(totalScore, getLineCompletionScore(line))
+			completionScore = append(completionScore, getLineCompletionScore(line))
+		} else {
+			errorScore += getLineErrorScore(line)
 		}
 	}
-	totalScore.Sort()
+	completionScore.Sort()
 
-	length := totalScore.Len()
+	length := completionScore.Len()
 	arithMean := (length / 2) + (length % 2)
 
-	return totalScore[arithMean-1]
+	return errorScore, completionScore[arithMean-1]
 }
 
 // Stack is a stack data structure for `byte`
