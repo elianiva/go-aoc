@@ -1,8 +1,8 @@
 package day10
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -11,14 +11,15 @@ import (
 func Solve() {
 	fmt.Println("======== DAY 10 ========")
 
-	inputFile, err := ioutil.ReadFile("day10/input.txt")
+	inputFile, err := os.Open("day10/input.txt")
 	if err != nil {
 		panic(err)
 	}
+	defer inputFile.Close()
 
-	input := strToLines(inputFile)
+	scanner := bufio.NewScanner(inputFile)
 
-	errorScore, completionScore := findScore(input)
+	errorScore, completionScore := findScore(scanner)
 
 	fmt.Println("PART 1:", errorScore)
 	fmt.Println("PART 2:", completionScore)
@@ -30,22 +31,24 @@ func strToLines(str []byte) []string {
 	return lines
 }
 
-func findScore(lines []string) (int, int) {
-	var completionScore sort.IntSlice
-	var errorScore int
-	for _, line := range lines {
-		if getLineErrorScore(line) == 0 {
-			completionScore = append(completionScore, getLineCompletionScore(line))
+func findScore(scanner *bufio.Scanner) (int, int) {
+	var completionTotal sort.IntSlice
+	var errorTotal int
+	for scanner.Scan() {
+		line := scanner.Text()
+		errScore := getLineErrorScore(line)
+		if errScore == 0 {
+			completionTotal = append(completionTotal, getLineCompletionScore(line))
 		} else {
-			errorScore += getLineErrorScore(line)
+			errorTotal += getLineErrorScore(line)
 		}
 	}
-	completionScore.Sort()
+	completionTotal.Sort()
 
-	length := completionScore.Len()
+	length := completionTotal.Len()
 	arithMean := (length / 2) + (length % 2)
 
-	return errorScore, completionScore[arithMean-1]
+	return errorTotal, completionTotal[arithMean-1]
 }
 
 // Stack is a stack data structure for `byte`
@@ -87,21 +90,43 @@ func isClosing(c byte) bool {
 }
 
 func getPair(c byte) byte {
-	return map[byte]byte{
-		')': '(', '(': ')',
-		']': '[', '[': ']',
-		'}': '{', '{': '}',
-		'>': '<', '<': '>',
-	}[c]
+	// it was using map[byte]byte, but switch statement is more efficient
+	// thanks @smolck
+	switch c {
+	case '(':
+		return ')'
+	case ')':
+		return '('
+	case '[':
+		return ']'
+	case ']':
+		return '['
+	case '{':
+		return '}'
+	case '}':
+		return '{'
+	case '>':
+		return '<'
+	case '<':
+		return '>'
+	default:
+		return ' '
+	}
 }
 
 func getCharErrorScore(c byte) int {
-	return map[byte]int{
-		')': 3,
-		']': 57,
-		'}': 1197,
-		'>': 25137,
-	}[c]
+	switch c {
+	case ')':
+		return 3
+	case ']':
+		return 57
+	case '}':
+		return 1197
+	case '>':
+		return 25137
+	default:
+		return 0
+	}
 }
 
 func getLineErrorScore(line string) int {
@@ -130,12 +155,18 @@ func getLineErrorScore(line string) int {
 }
 
 func getCharCompletionScore(c byte) int {
-	return map[byte]int{
-		')': 1,
-		']': 2,
-		'}': 3,
-		'>': 4,
-	}[c]
+	switch c {
+	case '(':
+		return 1
+	case '[':
+		return 2
+	case '{':
+		return 3
+	case '<':
+		return 4
+	default:
+		return 0
+	}
 }
 
 func getLineCompletionScore(line string) int {
@@ -154,8 +185,9 @@ func getLineCompletionScore(line string) int {
 
 	var score int
 	chars := stack.Get()
+
 	for i := len(chars) - 1; i >= 0; i-- {
-		score = (score * 5) + getCharCompletionScore(getPair(chars[i]))
+		score = (score * 5) + getCharCompletionScore(chars[i])
 	}
 
 	return score
